@@ -16,13 +16,12 @@
 const resultEl = document.getElementById("result");
 const html5QrCode = new Html5Qrcode("reader");
 
-// QR Scan Success
 function onScanSuccess(decodedText) {
 
   html5QrCode.stop();
 
-  fetch("https://script.google.com/macros/s/AKfycbyTD-PeSTsZS35sqleaPPEadV_BDhG8QK9_hT4uuesfDpox7PZR5nD1gGWHNIUx9p8p/exec?qr=" 
-  + encodeURIComponent(decodedText))
+  fetch("https://script.google.com/macros/s/AKfycbyTD-PeSTsZS35sqleaPPEadV_BDhG8QK9_hT4uuesfDpox7PZR5nD1gGWHNIUx9p8p/exec?qr="
+    + encodeURIComponent(decodedText))
     .then(response => response.text())
     .then(data => {
 
@@ -40,30 +39,14 @@ function onScanSuccess(decodedText) {
 
 }
 
-// Start Camera (Back Camera Preferred)
-Html5Qrcode.getCameras().then(devices => {
-
-  if (devices.length > 0) {
-
-    let backCamera = devices.find(device =>
-      device.label.toLowerCase().includes("back") ||
-      device.label.toLowerCase().includes("rear")
-    );
-
-    let cameraId = backCamera ? backCamera.id : devices[0].id;
-
-    html5QrCode.start(
-      cameraId,
-      { fps: 10, qrbox: 250 },
-      onScanSuccess
-    );
-
-  } else {
-    resultEl.innerHTML = "No Camera Found";
-  }
-
-}).catch(err => {
-  resultEl.innerHTML = "Camera Permission Denied";
+// 🔥 Start back camera (rear)
+html5QrCode.start(
+  { facingMode: { exact: "environment" } },
+  { fps: 10, qrbox: 250 },
+  onScanSuccess
+).catch(err => {
+  resultEl.innerHTML = "Camera Failed to Start";
+  console.log(err);
 });
 
 </script>

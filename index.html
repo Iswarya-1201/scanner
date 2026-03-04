@@ -26,10 +26,10 @@ function onScanSuccess(decodedText) {
     .then(data => {
 
       if (data === "ALLOWED") {
-        resultEl.innerHTML = "🟢 Entry Allowed";
+        resultEl.innerHTML = "🟢 Go Inside";
       }
       else if (data === "DUPLICATE") {
-        resultEl.innerHTML = "🔴 Duplicate Entry";
+        resultEl.innerHTML = "🔴 Go Out (Already Used)";
       }
       else {
         resultEl.innerHTML = "🔴 Not Registered";

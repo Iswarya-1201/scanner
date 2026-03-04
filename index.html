@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<script src="https://cdn.jsdelivr.net/npm/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
+</head>
+<body>
+
+<h2>Event Entry Scanner</h2>
+
+<div id="reader" style="width:300px;"></div>
+<h3 id="result"></h3>
+
+<script>
+
+const resultEl = document.getElementById("result");
+const html5QrCode = new Html5Qrcode("reader");
+
+// QR Scan Success
+function onScanSuccess(decodedText) {
+
+  html5QrCode.stop();
+
+  fetch("https://script.google.com/macros/s/AKfycbyTD-PeSTsZS35sqleaPPEadV_BDhG8QK9_hT4uuesfDpox7PZR5nD1gGWHNIUx9p8p/exec?qr=" 
+  + encodeURIComponent(decodedText))
+    .then(response => response.text())
+    .then(data => {
+
+      if (data === "ALLOWED") {
+        resultEl.innerHTML = "🟢 Entry Allowed";
+      }
+      else if (data === "DUPLICATE") {
+        resultEl.innerHTML = "🔴 Duplicate Entry";
+      }
+      else {
+        resultEl.innerHTML = "🔴 Not Registered";
+      }
+
+    });
+
+}
+
+// Start Camera (Back Camera Preferred)
+Html5Qrcode.getCameras().then(devices => {
+
+  if (devices.length > 0) {
+
+    let backCamera = devices.find(device =>
+      device.label.toLowerCase().includes("back") ||
+      device.label.toLowerCase().includes("rear")
+    );
+
+    let cameraId = backCamera ? backCamera.id : devices[0].id;
+
+    html5QrCode.start(
+      cameraId,
+      { fps: 10, qrbox: 250 },
+      onScanSuccess
+    );
+
+  } else {
+    resultEl.innerHTML = "No Camera Found";
+  }
+
+}).catch(err => {
+  resultEl.innerHTML = "Camera Permission Denied";
+});
+
+</script>
+
+</body>
+</html>

@@ -20,7 +20,7 @@ function onScanSuccess(decodedText) {
 
   html5QrCode.stop();
 
-  fetch("https://script.google.com/macros/s/AKfycbyTD-PeSTsZS35sqleaPPEadV_BDhG8QK9_hT4uuesfDpox7PZR5nD1gGWHNIUx9p8p/exec?qr="
+  fetch("https://script.google.com/macros/s/AKfycby2iYbCkXO0tNh15FUcu7eX9ItcCGtaMBaVpC_Tpn0fKkvHgtQRPx3ywTWrBHueYKQ/exec?qr="
     + encodeURIComponent(decodedText))
     .then(response => response.text())
     .then(data => {

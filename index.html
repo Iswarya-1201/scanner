@@ -57,7 +57,7 @@ function onScanSuccess(text) {
   scanner.stop();
   result.innerHTML = "Checking...";
 
-  fetch("https://script.google.com/macros/s/AKfycby2iYbCkXO0tNh15FUcu7eX9ItcCGtaMBaVpC_Tpn0fKkvHgtQRPx3ywTWrBHueYKQ/exec?qr=" 
+  fetch("https://script.google.com/macros/s/AKfycbzcg0_e351uqNeOkhVk2jyM4162hv59dcfSai8am3P1gLm18TwYJ8f7AenwZgwDT_OyBA/exec?qr=" 
 + encodeURIComponent(text))
     .then(data => {
 

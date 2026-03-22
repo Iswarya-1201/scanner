@@ -57,8 +57,8 @@ function onScanSuccess(text) {
   scanner.stop();
   result.innerHTML = "Checking...";
 
-  fetch("https://script.google.com/macros/s/AKfycby2iYbCkXO0tNh15FUcu7eX9ItcCGtaMBaVpC_Tpn0fKkvHgtQRPx3ywTWrBHueYKQ/exec?qr=" + encodeURIComponent(text))
-    .then(r => r.text())
+  fetch("https://script.google.com/macros/s/AKfycby2iYbCkXO0tNh15FUcu7eX9ItcCGtaMBaVpC_Tpn0fKkvHgtQRPx3ywTWrBHueYKQ/exec?qr=" 
++ encodeURIComponent(text))
     .then(data => {
 
       if (data === "ALLOWED") {

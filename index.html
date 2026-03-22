@@ -6,9 +6,8 @@
 
 <style>
 body { text-align:center; font-family:Arial; }
-#result { font-size:24px; margin-top:20px; }
-.green { color:green; }
-.red { color:red; }
+#result { font-size:22px; margin-top:20px; }
+button { padding:10px; font-size:16px; margin-top:10px; }
 </style>
 
 </head>
@@ -16,59 +15,67 @@ body { text-align:center; font-family:Arial; }
 
 <h2>Event Entry Scanner</h2>
 
-<div id="reader" style="width:300px;margin:auto;"></div>
-<h3 id="result">Starting camera...</h3>
+<button onclick="startScanner()">Start Scanner</button>
+
+<div id="reader" style="width:300px;margin:auto;margin-top:10px;"></div>
+<h3 id="result">Click Start</h3>
 
 <script>
 
-const resultEl = document.getElementById("result");
-const html5QrCode = new Html5Qrcode("reader");
+const result = document.getElementById("result");
+let scanner;
 
-function onScanSuccess(decodedText) {
+// 🔥 start only when button clicked (important fix)
+function startScanner() {
 
-  html5QrCode.stop();
-  resultEl.innerHTML = "Checking...";
+  scanner = new Html5Qrcode("reader");
 
-  fetch("https://script.google.com/macros/s/AKfycby2iYbCkXO0tNh15FUcu7eX9ItcCGtaMBaVpC_Tpn0fKkvHgtQRPx3ywTWrBHueYKQ/exec?qr=" 
-  + encodeURIComponent(decodedText))
+  Html5Qrcode.getCameras().then(cameras => {
 
-  .then(res => res.json())
-  .then(data => {
-
-    if (data.status === "ALLOWED") {
-      resultEl.innerHTML = "🟢 Go Inside";
-      resultEl.className = "green";
-    }
-    else if (data.status === "DUPLICATE") {
-      resultEl.innerHTML = "🔴 Already Entered";
-      resultEl.className = "red";
-    }
-    else {
-      resultEl.innerHTML = "🔴 Not Registered";
-      resultEl.className = "red";
+    if (cameras.length === 0) {
+      result.innerHTML = "❌ No Camera Found";
+      return;
     }
 
-  })
-  .catch(err => {
-    resultEl.innerHTML = "❌ Network Error";
-    console.log(err);
-  });
-}
+    // 👉 ALWAYS pick available camera safely
+    const cameraId = cameras[cameras.length - 1].id;
 
-// 🔥 Camera start (safe)
-Html5Qrcode.getCameras().then(devices => {
-  if (devices.length) {
-    html5QrCode.start(
-      devices[0].id,
+    scanner.start(
+      cameraId,
       { fps: 10, qrbox: 250 },
       onScanSuccess
     );
-  } else {
-    resultEl.innerHTML = "No Camera Found";
-  }
-}).catch(err => {
-  resultEl.innerHTML = "Camera Error";
-});
+
+  }).catch(err => {
+    result.innerHTML = "❌ Camera Permission Denied";
+  });
+}
+
+// 🔥 when QR scanned
+function onScanSuccess(text) {
+
+  scanner.stop();
+  result.innerHTML = "Checking...";
+
+  fetch("https://script.google.com/macros/s/AKfycby2iYbCkXO0tNh15FUcu7eX9ItcCGtaMBaVpC_Tpn0fKkvHgtQRPx3ywTWrBHueYKQ/exec?qr=" + encodeURIComponent(text))
+    .then(r => r.text())
+    .then(data => {
+
+      if (data === "ALLOWED") {
+        result.innerHTML = "🟢 Go Inside";
+      } 
+      else if (data === "DUPLICATE") {
+        result.innerHTML = "🔴 Already Entered";
+      } 
+      else {
+        result.innerHTML = "🔴 Not Registered";
+      }
+
+    })
+    .catch(() => {
+      result.innerHTML = "❌ Network Error";
+    });
+}
 
 </script>
 

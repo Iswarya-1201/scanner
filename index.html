@@ -5,17 +5,10 @@
 <script src="https://cdn.jsdelivr.net/npm/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
 
 <style>
-body {
-  text-align: center;
-  font-family: Arial;
-}
-#result {
-  font-size: 24px;
-  font-weight: bold;
-  margin-top: 20px;
-}
-.green { color: green; }
-.red { color: red; }
+body { text-align:center; font-family:Arial; }
+#result { font-size:24px; margin-top:20px; }
+.green { color:green; }
+.red { color:red; }
 </style>
 
 </head>
@@ -31,67 +24,50 @@ body {
 const resultEl = document.getElementById("result");
 const html5QrCode = new Html5Qrcode("reader");
 
-// 🔥 When QR is scanned
 function onScanSuccess(decodedText) {
 
   html5QrCode.stop();
-
   resultEl.innerHTML = "Checking...";
 
   fetch("https://script.google.com/macros/s/AKfycby2iYbCkXO0tNh15FUcu7eX9ItcCGtaMBaVpC_Tpn0fKkvHgtQRPx3ywTWrBHueYKQ/exec?qr=" 
-+ encodeURIComponent(decodedText), {
-  method: "GET",
-  mode: "no-cors"
-})
-    .then(res => res.text())
-    .then(data => {
+  + encodeURIComponent(decodedText))
 
-      if (data === "ALLOWED") {
-        resultEl.innerHTML = "🟢 Go Inside";
-        resultEl.className = "green";
-      }
-      else if (data === "DUPLICATE") {
-        resultEl.innerHTML = "🔴 Already Entered";
-        resultEl.className = "red";
-      }
-      else if (data === "NOT_REGISTERED") {
-        resultEl.innerHTML = "🔴 Not Registered";
-        resultEl.className = "red";
-      }
-      else {
-        resultEl.innerHTML = "⚠️ Error: " + data;
-      }
+  .then(res => res.json())
+  .then(data => {
 
-    })
-    .catch(err => {
-      resultEl.innerHTML = "❌ Network Error";
-      console.log(err);
-    });
+    if (data.status === "ALLOWED") {
+      resultEl.innerHTML = "🟢 Go Inside";
+      resultEl.className = "green";
+    }
+    else if (data.status === "DUPLICATE") {
+      resultEl.innerHTML = "🔴 Already Entered";
+      resultEl.className = "red";
+    }
+    else {
+      resultEl.innerHTML = "🔴 Not Registered";
+      resultEl.className = "red";
+    }
+
+  })
+  .catch(err => {
+    resultEl.innerHTML = "❌ Network Error";
+    console.log(err);
+  });
 }
 
-// 🔥 Start camera (fixed version)
-html5QrCode.start(
-  { facingMode: "environment" },   // ✅ fixed (no exact)
-  { fps: 10, qrbox: 250 },
-  onScanSuccess
-).catch(err => {
-
-  console.log(err);
-  resultEl.innerHTML = "Trying camera...";
-
-  // 🔁 fallback camera
-  Html5Qrcode.getCameras().then(devices => {
-    if (devices.length) {
-      html5QrCode.start(
-        devices[0].id,
-        { fps: 10, qrbox: 250 },
-        onScanSuccess
-      );
-    } else {
-      resultEl.innerHTML = "❌ No Camera Found";
-    }
-  });
-
+// 🔥 Camera start (safe)
+Html5Qrcode.getCameras().then(devices => {
+  if (devices.length) {
+    html5QrCode.start(
+      devices[0].id,
+      { fps: 10, qrbox: 250 },
+      onScanSuccess
+    );
+  } else {
+    resultEl.innerHTML = "No Camera Found";
+  }
+}).catch(err => {
+  resultEl.innerHTML = "Camera Error";
 });
 
 </script>

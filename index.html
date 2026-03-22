@@ -24,21 +24,24 @@ body {
 <h2>Event Entry Scanner</h2>
 
 <div id="reader" style="width:300px;margin:auto;"></div>
-<h3 id="result"></h3>
+<h3 id="result">Starting camera...</h3>
 
 <script>
 
 const resultEl = document.getElementById("result");
 const html5QrCode = new Html5Qrcode("reader");
 
-// 🔥 Scan success
+// 🔥 When QR is scanned
 function onScanSuccess(decodedText) {
 
   html5QrCode.stop();
 
-  fetch("https://script.google.com/macros/s/AKfycby2iYbCkXO0tNh15FUcu7eX9ItcCGtaMBaVpC_Tpn0fKkvHgtQRPx3ywTWrBHueYKQ/exec?qr="
+  resultEl.innerHTML = "Checking...";
+
+  fetch("https://script.google.com/macros/s/AKfycby2iYbCkXO0tNh15FUcu7eX9ItcCGtaMBaVpC_Tpn0fKkvHgtQRPx3ywTWrBHueYKQ/exec?qr=" 
     + encodeURIComponent(decodedText))
-    .then(response => response.text())
+
+    .then(res => res.text())
     .then(data => {
 
       if (data === "ALLOWED") {
@@ -49,22 +52,44 @@ function onScanSuccess(decodedText) {
         resultEl.innerHTML = "🔴 Already Entered";
         resultEl.className = "red";
       }
-      else {
+      else if (data === "NOT_REGISTERED") {
         resultEl.innerHTML = "🔴 Not Registered";
         resultEl.className = "red";
       }
+      else {
+        resultEl.innerHTML = "⚠️ Error: " + data;
+      }
 
+    })
+    .catch(err => {
+      resultEl.innerHTML = "❌ Network Error";
+      console.log(err);
     });
 }
 
-// 🔥 Start back camera
+// 🔥 Start camera (fixed version)
 html5QrCode.start(
-  { facingMode: "environment" },
+  { facingMode: "environment" },   // ✅ fixed (no exact)
   { fps: 10, qrbox: 250 },
   onScanSuccess
 ).catch(err => {
-  resultEl.innerHTML = "Camera Error";
+
   console.log(err);
+  resultEl.innerHTML = "Trying camera...";
+
+  // 🔁 fallback camera
+  Html5Qrcode.getCameras().then(devices => {
+    if (devices.length) {
+      html5QrCode.start(
+        devices[0].id,
+        { fps: 10, qrbox: 250 },
+        onScanSuccess
+      );
+    } else {
+      resultEl.innerHTML = "❌ No Camera Found";
+    }
+  });
+
 });
 
 </script>

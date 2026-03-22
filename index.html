@@ -3,11 +3,27 @@
 <head>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <script src="https://cdn.jsdelivr.net/npm/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
+
+<style>
+body {
+  text-align: center;
+  font-family: Arial;
+}
+#result {
+  font-size: 24px;
+  font-weight: bold;
+  margin-top: 20px;
+}
+.green { color: green; }
+.red { color: red; }
+</style>
+
 </head>
 <body>
+
 <h2>Event Entry Scanner</h2>
 
-<div id="reader" style="width:300px;"></div>
+<div id="reader" style="width:300px;margin:auto;"></div>
 <h3 id="result"></h3>
 
 <script>
@@ -15,6 +31,7 @@
 const resultEl = document.getElementById("result");
 const html5QrCode = new Html5Qrcode("reader");
 
+// 🔥 Scan success
 function onScanSuccess(decodedText) {
 
   html5QrCode.stop();
@@ -26,25 +43,27 @@ function onScanSuccess(decodedText) {
 
       if (data === "ALLOWED") {
         resultEl.innerHTML = "🟢 Go Inside";
+        resultEl.className = "green";
       }
       else if (data === "DUPLICATE") {
-        resultEl.innerHTML = "🔴 Go Out (Already Used)";
+        resultEl.innerHTML = "🔴 Already Entered";
+        resultEl.className = "red";
       }
       else {
         resultEl.innerHTML = "🔴 Not Registered";
+        resultEl.className = "red";
       }
 
     });
-
 }
 
-// 🔥 Start back camera (rear)
+// 🔥 Start camera (rear)
 html5QrCode.start(
-  { facingMode: { exact: "environment" } },
+  { facingMode: "environment" },
   { fps: 10, qrbox: 250 },
   onScanSuccess
 ).catch(err => {
-  resultEl.innerHTML = "Camera Failed to Start";
+  resultEl.innerHTML = "Camera Error";
   console.log(err);
 });
 

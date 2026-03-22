@@ -39,8 +39,10 @@ function onScanSuccess(decodedText) {
   resultEl.innerHTML = "Checking...";
 
   fetch("https://script.google.com/macros/s/AKfycby2iYbCkXO0tNh15FUcu7eX9ItcCGtaMBaVpC_Tpn0fKkvHgtQRPx3ywTWrBHueYKQ/exec?qr=" 
-    + encodeURIComponent(decodedText))
-
++ encodeURIComponent(decodedText), {
+  method: "GET",
+  mode: "no-cors"
+})
     .then(res => res.text())
     .then(data => {
 
